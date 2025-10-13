@@ -1,0 +1,16 @@
+{
+  "name": "mui-universale-table",
+  "version": "1.0.0",
+  "description": "A table made using Material UI",
+  "keywords": [
+    "react",
+    "materialui"
+  ],
+  "license": "ISC",
+  "author": "Skulldorom",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
