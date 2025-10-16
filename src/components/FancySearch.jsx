@@ -1,9 +1,11 @@
 import React, { useState, useCallback } from "react";
 import { TextField, InputAdornment, Box } from "@mui/material";
 import { Search } from "@mui/icons-material";
+import { useTheme } from "@mui/material/styles";
 import PropTypes from "prop-types";
 
 const FancySearch = ({ value, onSubmit, placeholder = "Search..." }) => {
+  const theme = useTheme();
   const [searchValue, setSearchValue] = useState(value || "");
   const [isFocused, setIsFocused] = useState(false);
 
@@ -60,36 +62,38 @@ const FancySearch = ({ value, onSubmit, placeholder = "Search..." }) => {
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <Search sx={{ color: "#9aa0a6" }} />
+              <Search sx={{ color: theme.palette.text.secondary }} />
             </InputAdornment>
           ),
           sx: {
-            borderRadius: "24px",
-            backgroundColor: "#fff",
-            transition: "all 0.2s ease-in-out",
+            borderRadius: theme.shape.borderRadius * 6, // 24px equivalent
+            backgroundColor: theme.palette.background.paper,
+            transition: theme.transitions.create("box-shadow", {
+              duration: theme.transitions.duration.short,
+            }),
             "&:hover": {
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              boxShadow: theme.shadows[2],
             },
             "&.Mui-focused": {
-              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+              boxShadow: theme.shadows[3],
             },
             "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: "#dadce0",
+              borderColor: theme.palette.divider,
               borderWidth: "1px",
             },
             "&:hover .MuiOutlinedInput-notchedOutline": {
-              borderColor: "#dadce0",
+              borderColor: theme.palette.divider,
             },
             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: "#4285f4",
+              borderColor: theme.palette.primary.main,
               borderWidth: "1px",
             },
             "& input": {
               padding: "8px 12px 8px 0",
               fontSize: "16px",
-              color: "#202124",
+              color: theme.palette.text.primary,
               "&::placeholder": {
-                color: "#9aa0a6",
+                color: theme.palette.text.secondary,
                 opacity: 1,
               },
             },
@@ -98,11 +102,9 @@ const FancySearch = ({ value, onSubmit, placeholder = "Search..." }) => {
         sx={{
           minWidth: 200,
           "& .MuiInputBase-root": {
-            boxShadow: isFocused
-              ? "0 2px 8px rgba(0,0,0,0.15)"
-              : "0 1px 6px rgba(32,33,36,.28)",
+            boxShadow: isFocused ? theme.shadows[3] : theme.shadows[1],
             "&:hover": {
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              boxShadow: theme.shadows[2],
             },
           },
         }}
