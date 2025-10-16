@@ -23,7 +23,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Verify build output
-        run: test -f dist/index.js || (echo "Build failed - dist/index.js not found" && exit 1)
+        run: test -f dist/index.js && test -f dist/index.esm.js || (echo "Build failed - dist files not found" && exit 1)
 
       # Create GitHub Release
       - name: Create GitHub Release
