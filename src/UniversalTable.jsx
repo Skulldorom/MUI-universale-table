@@ -100,7 +100,6 @@ export default function UniversalTable({
     const selectedIndex = selected.indexOf(id);
     let newSelected = [];
 
-    // eslint-disable-next-line no-else-return
     if (selectedIndex === -1) {
       // Item not selected, add it
       newSelected = [...selected, id];
