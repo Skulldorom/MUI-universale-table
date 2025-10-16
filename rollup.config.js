@@ -23,6 +23,13 @@ export default [
         exports: "named",
       },
     ],
+    onwarn(warning, warn) {
+      // Suppress "use client" directive warnings from MUI components
+      if (warning.code === "MODULE_LEVEL_DIRECTIVE") {
+        return;
+      }
+      warn(warning);
+    },
     plugins: [
       peerDepsExternal(),
       resolve({
