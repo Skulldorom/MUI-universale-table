@@ -21,11 +21,6 @@ const TableLoader = () => {
             ))}
           </TableRow>
         ))}
-        <TableRow>
-          <TableCell>
-            <Skeleton width="30%" sx={{ float: "right" }} />
-          </TableCell>
-        </TableRow>
       </TableBody>
     </>
   );
