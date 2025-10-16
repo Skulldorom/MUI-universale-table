@@ -1,122 +1,102 @@
-import React, { useState, useCallback } from "react";
-import { TextField, InputAdornment, Box } from "@mui/material";
-import { Search } from "@mui/icons-material";
-import { useTheme } from "@mui/material/styles";
+import React from "react";
+import {
+  Collapse,
+  Divider,
+  IconButton,
+  InputBase,
+  Paper,
+  Stack,
+} from "@mui/material";
+import { Clear, Search } from "@mui/icons-material";
 import PropTypes from "prop-types";
 
-const FancySearch = ({ value, onSubmit, placeholder = "Search..." }) => {
-  const theme = useTheme();
-  const [searchValue, setSearchValue] = useState(value || "");
-  const [isFocused, setIsFocused] = useState(false);
+export default function FancySearch({ value, onSubmit }) {
+  const [search, setSearch] = React.useState(value);
+  const [hover, setHover] = React.useState(search ? true : false);
 
-  const handleSubmit = useCallback(
-    (event) => {
-      event.preventDefault();
-      if (onSubmit) {
-        onSubmit(searchValue);
-      }
-    },
-    [searchValue, onSubmit]
-  );
+  const handleSubmit = (e) => {
+    e.preventDefault(); // Prevent the form from actually submitting
 
-  const handleChange = useCallback(
-    (event) => {
-      const newValue = event.target.value;
-      setSearchValue(newValue);
-      if (onSubmit) {
-        onSubmit(newValue);
-      }
-    },
-    [onSubmit]
-  );
-
-  const handleFocus = useCallback(() => {
-    setIsFocused(true);
-  }, []);
-
-  const handleBlur = useCallback(() => {
-    setIsFocused(false);
-  }, []);
+    onSubmit(search);
+  };
 
   React.useEffect(() => {
-    setSearchValue(value || "");
-  }, [value]);
+    if (search) setHover(true);
+    else setHover(false);
+  }, [search]);
+
+  const handleEndHover = () => {
+    if (search) return;
+    setHover(false);
+  };
+
+  React.useEffect(() => {
+    // if the value hasnt changed after a short internal call the function
+    const timer = setTimeout(() => {
+      onSubmit(search);
+    }, 700);
+    return () => clearTimeout(timer);
+  }, [search, value, onSubmit]);
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      sx={{
-        position: "relative",
-        display: "inline-block",
-      }}
-    >
-      <TextField
-        value={searchValue}
-        onChange={handleChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        placeholder={placeholder}
-        variant="outlined"
-        size="small"
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <Search sx={{ color: theme.palette.text.secondary }} />
-            </InputAdornment>
-          ),
-          sx: {
-            borderRadius: theme.shape.borderRadius * 6, // 24px equivalent
-            backgroundColor: theme.palette.background.paper,
-            transition: theme.transitions.create("box-shadow", {
-              duration: theme.transitions.duration.short,
-            }),
-            "&:hover": {
-              boxShadow: theme.shadows[2],
-            },
-            "&.Mui-focused": {
-              boxShadow: theme.shadows[3],
-            },
-            "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: theme.palette.divider,
-              borderWidth: "1px",
-            },
-            "&:hover .MuiOutlinedInput-notchedOutline": {
-              borderColor: theme.palette.divider,
-            },
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: theme.palette.primary.main,
-              borderWidth: "1px",
-            },
-            "& input": {
-              padding: "8px 12px 8px 0",
-              fontSize: "16px",
-              color: theme.palette.text.primary,
-              "&::placeholder": {
-                color: theme.palette.text.secondary,
-                opacity: 1,
-              },
-            },
-          },
-        }}
+    <form onSubmit={handleSubmit}>
+      <Paper
+        elevation={0}
         sx={{
-          minWidth: 200,
-          "& .MuiInputBase-root": {
-            boxShadow: isFocused ? theme.shadows[3] : theme.shadows[1],
-            "&:hover": {
-              boxShadow: theme.shadows[2],
-            },
-          },
+          borderRadius: hover ? "24px" : "50px", // changes when hover starts or ends
+          display: "flex",
+          alignItems: "center",
+          transition: "all 0.5s ease-in-out", // smooth transition in both directions
+          p: hover ? 1 : 0.5, // smooth padding transition
+          width: "fit-content", // fit content to children
+          border: (theme) => `1px solid ${theme.palette.divider}`,
+          mb: 1,
         }}
-      />
-    </Box>
+        onMouseEnter={() => setHover(true)}
+        onKeyDown={(e) => e.key === "Enter" && handleSubmit(e)}
+      >
+        <InputBase
+          placeholder="Search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          sx={{
+            ml: 1,
+            width: hover ? "100%" : 0, // animate width in both hover states
+            transition: "width 0.5s ease-in-out", // smooth width change
+            ...(hover ? {} : { margin: 0 }), // remove margin when not hovering
+          }}
+          onBlur={handleEndHover}
+        />
+
+        <Collapse
+          in={search ? true : false}
+          orientation="horizontal"
+          unmountOnExit
+        >
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={0}
+            sx={{
+              mr: 3,
+            }}
+          >
+            <IconButton onClick={() => setSearch("")}>
+              <Clear />
+            </IconButton>
+            <Divider orientation="vertical" flexItem />
+          </Stack>
+        </Collapse>
+
+        <IconButton onClick={handleSubmit} type="submit">
+          <Search />
+        </IconButton>
+      </Paper>
+    </form>
   );
-};
+}
 
 FancySearch.propTypes = {
   value: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,
-  placeholder: PropTypes.string,
 };
-
-export default FancySearch;
