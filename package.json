@@ -1,6 +1,6 @@
 {
   "name": "mui-universale-table",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0",
   "description": "A universal table component built with Material UI for React applications",
   "keywords": [
     "react",
@@ -75,7 +75,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Skulldorom/MUI-universale-table.git"
+    "url": "git+https://github.com/Skulldorom/MUI-universale-table.git"
   },
   "bugs": {
     "url": "https://github.com/Skulldorom/MUI-universale-table/issues"
