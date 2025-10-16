@@ -100,7 +100,7 @@ export default function UniversalTable({
     const selectedIndex = selected.indexOf(id);
     let newSelected = [];
 
-    // eslint-disable-next-line unicorn/prefer-ternary
+    // eslint-disable-next-line no-else-return
     if (selectedIndex === -1) {
       // Item not selected, add it
       newSelected = [...selected, id];
@@ -276,6 +276,11 @@ EnhancedTableHead.propTypes = {
   onRequestSort: PropTypes.func.isRequired,
   order: PropTypes.oneOf(["asc", "desc"]).isRequired,
   orderBy: PropTypes.string.isRequired,
+  headings: PropTypes.array.isRequired,
+  selectRows: PropTypes.bool,
+  numSelected: PropTypes.number,
+  rowCount: PropTypes.number,
+  onSelectAllClick: PropTypes.func,
 };
 
 function EnhancedTable(props) {
@@ -350,9 +355,12 @@ function EnhancedTable(props) {
                 {stableSort(rows, getComparator(order, orderBy), props.headers)
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row, index) => {
+                    const rowKey = selectID
+                      ? row[selectID]
+                      : `row-${page * rowsPerPage + index}`;
                     return (
                       <DataRow
-                        key={index}
+                        key={rowKey}
                         rowID={selectID ? row[selectID] : index}
                         headers={props.headers}
                         rowValues={row}
@@ -595,4 +603,40 @@ UniversalTable.propTypes = {
   selectID: PropTypes.string,
   selectIcon: PropTypes.element,
   onSelection: PropTypes.func,
+};
+
+// PropTypes for internal components
+EnhancedTable.propTypes = {
+  headers: PropTypes.array.isRequired,
+  rows: PropTypes.array.isRequired,
+  subTable: PropTypes.bool,
+  hideBadge: PropTypes.bool,
+  loading: PropTypes.bool,
+  selectRows: PropTypes.bool,
+  handleSelectAllClick: PropTypes.func,
+  handleClick: PropTypes.func,
+  selected: PropTypes.array,
+  selectID: PropTypes.string,
+  resetFlag: PropTypes.string,
+};
+
+DataRow.propTypes = {
+  rowValues: PropTypes.object.isRequired,
+  headers: PropTypes.array.isRequired,
+  selectRows: PropTypes.bool,
+  isSelected: PropTypes.func.isRequired,
+  handleClick: PropTypes.func,
+  hideBadge: PropTypes.bool,
+  rowID: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+};
+
+SearchArea.propTypes = {
+  current: PropTypes.string,
+  setFinalVal: PropTypes.func.isRequired,
+  searchName: PropTypes.string,
+};
+
+ReloadBtn.propTypes = {
+  setLoading: PropTypes.func.isRequired,
+  loading: PropTypes.bool,
 };

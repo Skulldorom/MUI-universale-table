@@ -1,13 +1,17 @@
 import { ReactNode, ReactElement } from "react";
 
+export interface TableRowData {
+  [key: string]: unknown;
+}
+
 export interface TableHeader {
   id: string;
   label: string;
   searchable?: boolean;
   numeric?: boolean;
   date?: boolean;
-  component?: (rowData: any) => ReactElement;
-  cellProps?: object;
+  component?: (rowData: TableRowData) => ReactElement;
+  cellProps?: Record<string, unknown>;
   subRow?: boolean;
   iconColor?: string;
   openIcon?: ReactElement;
@@ -20,7 +24,7 @@ export interface TableHeader {
 
 export interface UniversalTableProps {
   /** Array of data objects to display */
-  data: any[];
+  data: TableRowData[];
   /** Array of header configuration objects */
   headers: TableHeader[];
   /** Table title */
@@ -48,7 +52,7 @@ export interface UniversalTableProps {
   /** Custom icon for selection action */
   selectIcon?: ReactElement;
   /** Callback when rows are selected */
-  onSelection?: (selectedIds: any[]) => void;
+  onSelection?: (selectedIds: unknown[]) => void;
 }
 
 declare const UniversalTable: React.FC<UniversalTableProps>;

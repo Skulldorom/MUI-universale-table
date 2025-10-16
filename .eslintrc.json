@@ -5,11 +5,9 @@
   },
   "extends": [
     "eslint:recommended",
-    "@typescript-eslint/recommended",
     "plugin:react/recommended",
     "plugin:react-hooks/recommended"
   ],
-  "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true
@@ -18,15 +16,20 @@
     "sourceType": "module"
   },
   "plugins": [
-    "react",
-    "@typescript-eslint"
+    "react"
   ],
   "rules": {
-    "react/react-in-jsx-scope": "off"
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": "warn",
+    "no-console": "warn",
+    "no-unused-vars": "warn",
+    "react/jsx-key": "error",
+    "react-hooks/exhaustive-deps": "warn"
   },
   "settings": {
     "react": {
       "version": "detect"
     }
-  }
+  },
+  "ignorePatterns": ["*.d.ts", "dist/", "node_modules/"]
 }
