@@ -1,19 +1,33 @@
 import React from "react";
-import { TableBody, TableCell, TableRow, Skeleton } from "@mui/material";
+import {
+  TableBody,
+  TableCell,
+  TableRow,
+  Skeleton,
+  TableHead,
+} from "@mui/material";
 
 const TableLoader = () => {
   return (
-    <TableBody>
-      {Array.from({ length: 5 }).map((_, index) => (
-        <TableRow key={index}>
-          {Array.from({ length: 4 }).map((_, cellIndex) => (
-            <TableCell key={cellIndex}>
-              <Skeleton variant="text" width="100%" height={20} />
-            </TableCell>
-          ))}
+    <>
+      <TableHead />
+      <TableBody>
+        {Array.from({ length: 5 }).map((_, index) => (
+          <TableRow key={index}>
+            {Array.from({ length: 4 }).map((_, cellIndex) => (
+              <TableCell key={cellIndex}>
+                <Skeleton height={30} />
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+        <TableRow>
+          <TableCell>
+            <Skeleton width="30%" sx={{ float: "right" }} />
+          </TableCell>
         </TableRow>
-      ))}
-    </TableBody>
+      </TableBody>
+    </>
   );
 };
 
