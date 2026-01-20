@@ -84,5 +84,8 @@
   "bugs": {
     "url": "https://github.com/Skulldorom/MUI-universale-table/issues"
   },
-  "homepage": "https://github.com/Skulldorom/MUI-universale-table#readme"
+  "homepage": "https://github.com/Skulldorom/MUI-universale-table#readme",
+  "dependencies": {
+    "tslib": "^2.8.1"
+  }
 }
