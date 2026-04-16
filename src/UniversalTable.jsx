@@ -77,8 +77,11 @@ export default function UniversalTable({
 
   React.useEffect(() => {
     setRows(filteredRows);
-    setSelected([]);
   }, [filteredRows]);
+
+  React.useEffect(() => {
+    setSelected([]);
+  }, [searchDets]);
 
   const handleSearchChange = React.useCallback((value) => {
     setSearchDets(value);
@@ -95,7 +98,7 @@ export default function UniversalTable({
     setSelected([]);
   };
 
-  const handleClick = (event, id) => {
+  const handleClick = React.useCallback((event, id) => {
     if (!selectRows) return;
     const selectedIndex = selected.indexOf(id);
     let newSelected = [];
@@ -108,7 +111,7 @@ export default function UniversalTable({
       newSelected = selected.filter((selectedId) => selectedId !== id);
     }
     setSelected(newSelected);
-  };
+  }, [selected, selectRows]);
 
   return (
     <>
@@ -317,7 +320,7 @@ function EnhancedTable(props) {
 
   React.useEffect(() => {
     setPage(0);
-  }, [resetFlag, rows]);
+  }, [resetFlag]);
 
   const pageOptions = () => {
     if (rows.length <= 5) return [5];
@@ -328,7 +331,16 @@ function EnhancedTable(props) {
     return [5, 10, 25, 50, 100, rows.length];
   };
 
-  const isSelected = (id) => selected.includes(id);
+  const isSelected = React.useCallback((id) => selected.includes(id), [selected]);
+
+  const visibleRows = React.useMemo(
+    () =>
+      stableSort(rows, getComparator(order, orderBy), props.headers).slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      ),
+    [rows, order, orderBy, props.headers, page, rowsPerPage]
+  );
 
   return (
     <>
@@ -350,9 +362,7 @@ function EnhancedTable(props) {
               />
 
               <TableBody>
-                {stableSort(rows, getComparator(order, orderBy), props.headers)
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row, index) => {
+                {visibleRows.map((row, index) => {
                     const rowKey = selectID
                       ? row[selectID]
                       : `row-${page * rowsPerPage + index}`;
@@ -399,7 +409,7 @@ function EnhancedTable(props) {
   );
 }
 
-function DataRow(props) {
+const DataRow = React.memo(function DataRow(props) {
   const { rowValues, headers, selectRows, isSelected, handleClick } = props;
   const subTables = headers.filter((header) => header.subRow);
   const component = headers.filter((header) => !header.subRow);
@@ -514,7 +524,7 @@ function DataRow(props) {
       ))}
     </>
   );
-}
+});
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
