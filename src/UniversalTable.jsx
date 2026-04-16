@@ -166,8 +166,7 @@ export default function UniversalTable({
             <Stack
               spacing={2}
               direction={{ xs: "column", md: "row" }}
-              alignItems={{ xs: "flex-start", md: "center" }}
-              sx={{ width: "100%" }}
+              sx={{ width: "100%", alignItems: { xs: "flex-start", md: "center" } }}
             >
               <Box sx={{ flex: "1 1 100%" }} id="tableTitle">
                 <ReloadBtn setLoading={setLoading} loading={reloadBtnLoading} />
