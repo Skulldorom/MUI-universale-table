@@ -1,45 +1,109 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
-# For more information see: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages
+# This workflow auto-increments the version and publishes on every push to main (patch bump).
+# When triggered manually via workflow_dispatch, you can choose patch, minor, or major.
 
 name: Node.js Package
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version increment type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 jobs:
   build-and-publish:
+    # Skip push events triggered by the version-bump commit to avoid an infinite loop.
+    # workflow_dispatch events are always allowed through.
+    if: "github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, 'chore: bump version')"
     runs-on: ubuntu-latest
     permissions:
       contents: write
       packages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Use a PAT or the default token; fetch full history for tagging
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           registry-url: https://registry.npmjs.org/
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
       - run: npm ci
+      - run: npm test
       - run: npm run build
+
       - name: Verify build output
-        run: test -f dist/index.js && test -f dist/index.esm.js || (echo "Build failed - dist files not found" && exit 1)
+        run: test -f dist/index.js || (echo "Build failed - dist/index.js not found" && exit 1)
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            NOTES=$(git log --pretty=format:"- %s" "${PREV_TAG}..HEAD")
+          else
+            NOTES=$(git log --pretty=format:"- %s")
+          fi
+          if [ -z "$NOTES" ]; then
+            NOTES="- Dependency updates and maintenance"
+          fi
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      # Use the chosen type on manual dispatch, default to patch on push
+      - name: Bump version
+        id: version
+        run: |
+          VERSION_TYPE="${{ github.event.inputs.version_type || 'patch' }}"
+          npm version $VERSION_TYPE --no-git-tag-version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Commit and tag version bump
+        run: |
+          git add package.json package-lock.json
+          git commit -m "chore: bump version to ${{ steps.version.outputs.new_version }}"
+          git tag ${{ steps.version.outputs.tag }}
+          git push origin main --follow-tags
 
       # Create GitHub Release
       - name: Create GitHub Release
-        id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Release ${{ steps.version.outputs.tag }}
           body: |
-            Changes in this Release
-            - Automatically generated from tag ${{ github.ref_name }}
-            - Check [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for detailed changes
+            ## Changes in this Release
+
+            ${{ steps.release_notes.outputs.notes }}
           draft: false
           prerelease: false
 
       # Publish to NPM
-      - run: npm publish --access public
+      - run: npm publish --provenance --access public
         env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
