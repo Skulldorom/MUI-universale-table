@@ -476,7 +476,7 @@ const DataRow = React.memo(function DataRow(props) {
                       vertical: "bottom",
                       horizontal: "right",
                     }}
-                    componentsProps={{
+                    slotProps={{
                       badge: {
                         sx: { color: (theme) => theme.palette.text.primary },
                       },
