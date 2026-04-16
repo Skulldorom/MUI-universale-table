@@ -73,31 +73,37 @@ jobs:
           echo "$NOTES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+      # Use the chosen type on manual dispatch, default to patch on push
       - name: Bump version
-        id: bump_version
+        id: version
         run: |
-          VERSION_TYPE=${{ github.event.inputs.version_type || 'patch' }}
-          NEW_VERSION=$(npm version "$VERSION_TYPE" --no-git-tag-version)
+          VERSION_TYPE="${{ github.event.inputs.version_type || 'patch' }}"
+          npm version $VERSION_TYPE --no-git-tag-version
+          NEW_VERSION=$(node -p "require('./package.json').version")
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Commit and push version bump
+      - name: Commit and tag version bump
         run: |
           git add package.json package-lock.json
-          git commit -m "chore: bump version to ${{ steps.bump_version.outputs.new_version }}"
-          git tag ${{ steps.bump_version.outputs.new_version }}
+          git commit -m "chore: bump version to ${{ steps.version.outputs.new_version }}"
+          git tag ${{ steps.version.outputs.tag }}
           git push origin main --follow-tags
 
       # Create GitHub Release
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.bump_version.outputs.new_version }}
-          name: Release ${{ steps.bump_version.outputs.new_version }}
-          body: ${{ steps.release_notes.outputs.notes }}
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Release ${{ steps.version.outputs.tag }}
+          body: |
+            ## Changes in this Release
+
+            ${{ steps.release_notes.outputs.notes }}
           draft: false
           prerelease: false
 
       # Publish to NPM
-      - run: npm publish --access public
+      - run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
