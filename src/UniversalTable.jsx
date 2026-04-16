@@ -481,9 +481,9 @@ const DataRow = React.memo(function DataRow(props) {
                       vertical: "bottom",
                       horizontal: "right",
                     }}
-                    slotProps={{
-                      badge: {
-                        sx: { color: (theme) => theme.palette.text.primary },
+                    sx={{
+                      "& .MuiBadge-badge": {
+                        color: (theme) => theme.palette.text.primary,
                       },
                     }}
                   >
