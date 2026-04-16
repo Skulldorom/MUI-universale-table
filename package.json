@@ -29,8 +29,8 @@
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "prepare": "npm run build",
-    "test": "jest",
-    "test:watch": "jest --watch",
+    "test": "node --experimental-vm-modules node_modules/jest-cli/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --watch",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix"
   },

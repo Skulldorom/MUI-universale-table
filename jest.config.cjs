@@ -1,11 +1,12 @@
 module.exports = {
   testEnvironment: "jsdom",
   setupFilesAfterEnv: ["<rootDir>/src/setupTests.js"],
-  moduleNameMapping: {
+  moduleNameMapper: {
     "\\.(css|less|scss|sass)$": "identity-obj-proxy",
   },
+  extensionsToTreatAsEsm: [".jsx"],
   transform: {
-    "^.+\\.(js|jsx)$": "babel-jest",
+    "^.+\\.(js|jsx)$": ["babel-jest", { configFile: "./babel.config.cjs" }],
   },
   moduleFileExtensions: ["js", "jsx", "json"],
   collectCoverageFrom: [

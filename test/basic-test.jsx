@@ -1,20 +1,20 @@
 import React from "react";
+import { render, screen } from "@testing-library/react";
 import { UniversalTable } from "../src/index.js";
 
-// Basic test to ensure the component can be imported and used
-const TestComponent = () => {
-  const headers = [
-    { id: "name", label: "Name", searchable: true },
-    { id: "email", label: "Email", searchable: true },
-    { id: "age", label: "Age", numeric: true },
-  ];
+const headers = [
+  { id: "name", label: "Name", searchable: true },
+  { id: "email", label: "Email", searchable: true },
+  { id: "age", label: "Age", numeric: true },
+];
 
-  const data = [
-    { name: "John Doe", email: "john@example.com", age: 30 },
-    { name: "Jane Smith", email: "jane@example.com", age: 25 },
-  ];
+const data = [
+  { name: "John Doe", email: "john@example.com", age: 30 },
+  { name: "Jane Smith", email: "jane@example.com", age: 25 },
+];
 
-  return (
+test("renders UniversalTable without crashing", () => {
+  render(
     <UniversalTable
       data={data}
       headers={headers}
@@ -22,6 +22,18 @@ const TestComponent = () => {
       loading={false}
     />
   );
-};
+  expect(screen.getByText("Test Users")).toBeInTheDocument();
+});
 
-export default TestComponent;
+test("renders table rows", () => {
+  render(
+    <UniversalTable
+      data={data}
+      headers={headers}
+      name="Test Users"
+      loading={false}
+    />
+  );
+  expect(screen.getByText("John Doe")).toBeInTheDocument();
+  expect(screen.getByText("Jane Smith")).toBeInTheDocument();
+});
