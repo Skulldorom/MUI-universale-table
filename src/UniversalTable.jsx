@@ -20,7 +20,7 @@ import {
   TableContainer,
   Checkbox,
 } from "@mui/material";
-import { Box } from "@mui/system";
+import { Box } from "@mui/material";
 import TableLoader from "./components/TableLoader";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { AddCircle, RemoveCircle, Task } from "@mui/icons-material";
@@ -28,6 +28,23 @@ import { AddCircle, RemoveCircle, Task } from "@mui/icons-material";
 import { alpha } from "@mui/material/styles";
 import LazyLoadingIndicator from "./components/LazyLoadingIndicator";
 import FancySearch from "./components/FancySearch";
+
+/**
+ * Standard visually-hidden style: content is accessible to screen readers
+ * but invisible on screen. Defined locally to avoid importing from
+ * @mui/utils which is not a declared peer dependency.
+ */
+const visuallyHidden = {
+  border: 0,
+  clip: "rect(0 0 0 0)",
+  height: "1px",
+  margin: -1,
+  overflow: "hidden",
+  padding: 0,
+  position: "absolute",
+  whiteSpace: "nowrap",
+  width: "1px",
+};
 
 export default function UniversalTable({
   loading,
@@ -249,21 +266,9 @@ function EnhancedTableHead(props) {
             >
               {headCell.label}
               {orderBy === headCell.id ? (
-                <span
-                  style={{
-                    border: 0,
-                    clip: "rect(0 0 0 0)",
-                    height: 1,
-                    margin: -1,
-                    overflow: "hidden",
-                    padding: 0,
-                    position: "absolute",
-                    top: 20,
-                    width: 1,
-                  }}
-                >
+                <Box component="span" sx={visuallyHidden}>
                   {order === "desc" ? "sorted descending" : "sorted ascending"}
-                </span>
+                </Box>
               ) : undefined}
             </TableSortLabel>
           </TableCell>
@@ -476,7 +481,7 @@ const DataRow = React.memo(function DataRow(props) {
                       vertical: "bottom",
                       horizontal: "right",
                     }}
-                    componentsProps={{
+                    slotProps={{
                       badge: {
                         sx: { color: (theme) => theme.palette.text.primary },
                       },
