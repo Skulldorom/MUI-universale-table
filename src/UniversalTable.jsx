@@ -620,11 +620,11 @@ const DataRow = React.memo(function DataRow(props) {
   );
 
   const toggleSubRow = React.useCallback((index) => {
-    setReveal((previous) => {
-      const next = [...previous];
-      next[index] = !next[index];
-      return next;
-    });
+    setReveal((previous) =>
+      previous.map((value, currentIndex) =>
+        currentIndex === index ? !value : value,
+      ),
+    );
   }, []);
 
   return (
