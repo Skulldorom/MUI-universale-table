@@ -15,15 +15,16 @@
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
-  "types": "dist/index.d.ts",
+  "types": "src/index.d.ts",
   "files": [
     "dist",
+    "src/index.d.ts",
     "LICENSE",
     "README.md"
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./src/index.d.ts",
       "import": "./dist/index.esm.js",
       "require": "./dist/index.js"
     }
@@ -32,7 +33,6 @@
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "prepare": "npm run build",
-    "prepack": "npm run build",
     "test": "node --experimental-vm-modules node_modules/jest-cli/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --watch",
     "lint": "eslint src",
@@ -78,7 +78,6 @@
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "rollup": "^4.60.1",
-    "rollup-plugin-dts": "^6.4.1",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "typescript": "^6.0.2"
   },

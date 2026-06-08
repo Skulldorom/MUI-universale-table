@@ -30,8 +30,9 @@ npm install /absolute/path/to/MUI-universale-table
 
 Notes:
 
-- This package runs `prepare`/`prepack`, so the `dist/` output is built automatically during local installs.
+- This package runs `prepare`, so the `dist/` output is built automatically during local installs.
 - Re-run the same install command after making changes to refresh the installed package in your test project.
+- Type declarations are maintained in `src/index.d.ts` and shipped with the package.
 
 ### Peer Dependencies
 
