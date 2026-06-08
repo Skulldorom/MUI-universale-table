@@ -711,7 +711,10 @@ function stableSort(array, comparator, headers) {
 function SearchArea(props) {
   const { current, setFinalVal } = props;
   const searchVal = React.useMemo(
-    () => current || sessionStorage.getItem(`searchVal:${props.searchName}`) || "",
+    () =>
+      current ||
+      sessionStorage.getItem(`searchVal:${props.searchName}`) ||
+      "",
     [current, props.searchName],
   );
 
