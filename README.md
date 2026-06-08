@@ -20,38 +20,6 @@ A comprehensive, feature-rich table component built with Material-UI for React a
 npm install mui-universale-table
 ```
 
-### Local Package Testing
-
-You can install this repository directly into another local project:
-
-```bash
-npm install /absolute/path/to/MUI-universale-table
-```
-
-If your app is configured with a folder link such as:
-
-```json
-"mui-universale-table": "file:../MUI-universale-table"
-```
-
-and you see `Invalid hook call`, you are likely loading multiple React instances during local development.
-
-Recommended local test flow (matches published package behavior):
-
-```bash
-# from this repository
-npm run pack:local
-
-# from your consuming app
-npm install ../MUI-universale-table/mui-universale-table-<version>.tgz
-```
-
-Notes:
-
-- This package runs `prepare`, so the `dist/` output is built automatically during local installs.
-- Re-run the same install command after making changes to refresh the installed package in your test project.
-- Type declarations are maintained in `src/index.d.ts` and shipped with the package.
-
 ### Peer Dependencies
 
 Make sure you have these peer dependencies installed:
