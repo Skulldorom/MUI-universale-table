@@ -69,7 +69,7 @@ function filterRows(data, searchTerm, filterOptions) {
 }
 
 function useSearchableRows(data, headers) {
-  const [searchDets, setSearchDets] = React.useState("");
+  const [searchTerm, setSearchTerm] = React.useState("");
 
   const filterOptions = React.useMemo(
     () => getSearchableColumnIds(headers),
@@ -77,14 +77,14 @@ function useSearchableRows(data, headers) {
   );
 
   const rows = React.useMemo(
-    () => filterRows(data, searchDets, filterOptions),
-    [data, filterOptions, searchDets],
+    () => filterRows(data, searchTerm, filterOptions),
+    [data, filterOptions, searchTerm],
   );
 
   return {
     rows,
-    searchDets,
-    setSearchDets,
+    searchTerm,
+    setSearchTerm,
   };
 }
 
@@ -178,7 +178,7 @@ function TableTitle({ name, subTable }) {
 function TableToolbarContent({
   setLoading,
   reloadBtnLoading,
-  searchDets,
+  searchTerm,
   onSearchChange,
   name,
 }) {
@@ -202,7 +202,7 @@ function TableToolbarContent({
           <ReloadBtn setLoading={setLoading} loading={reloadBtnLoading} />
         </Box>
         <SearchArea
-          current={searchDets}
+          current={searchTerm}
           setFinalVal={onSearchChange}
           searchName={name}
         />
@@ -229,7 +229,7 @@ export default function UniversalTable({
   onSelection,
 }) {
   const head = headers || [];
-  const { rows, searchDets, setSearchDets } = useSearchableRows(data, head);
+  const { rows, searchTerm, setSearchTerm } = useSearchableRows(data, head);
   const { selected, clearSelection, handleSelectAllClick, handleClick } =
     useSelectableRows({
       rows,
@@ -240,9 +240,9 @@ export default function UniversalTable({
   const handleSearchChange = React.useCallback(
     (value) => {
       clearSelection();
-      setSearchDets(value);
+      setSearchTerm(value);
     },
-    [clearSelection, setSearchDets],
+    [clearSelection, setSearchTerm],
   );
 
   return (
@@ -267,7 +267,7 @@ export default function UniversalTable({
           <TableToolbarContent
             setLoading={setLoading}
             reloadBtnLoading={reloadBtnLoading}
-            searchDets={searchDets}
+            searchTerm={searchTerm}
             onSearchChange={handleSearchChange}
             name={name}
           />
@@ -275,7 +275,7 @@ export default function UniversalTable({
         <EnhancedTable
           headers={head}
           rows={rows}
-          resetFlag={searchDets}
+          resetFlag={searchTerm}
           subTable={subTable}
           hideBadge={hideBadge}
           loading={loading}
@@ -362,7 +362,21 @@ function useEnhancedTableState({ rows, subTable, resetFlag }) {
     resetFlag,
   }));
 
-  const page = pagination.resetFlag === resetFlag ? pagination.page : 0;
+  React.useEffect(() => {
+    setPagination((previous) => {
+      if (previous.resetFlag === resetFlag) {
+        return previous;
+      }
+
+      return {
+        ...previous,
+        page: 0,
+        resetFlag,
+      };
+    });
+  }, [resetFlag]);
+
+  const page = pagination.page;
   const rowsPerPage = subTable ? rows.length : pagination.rowsPerPage;
 
   const handleRequestSort = React.useCallback(
@@ -379,10 +393,9 @@ function useEnhancedTableState({ rows, subTable, resetFlag }) {
       setPagination((previous) => ({
         ...previous,
         page: newPage,
-        resetFlag,
       }));
     },
-    [resetFlag],
+    [],
   );
 
   const handleChangeRowsPerPage = React.useCallback(
@@ -391,10 +404,9 @@ function useEnhancedTableState({ rows, subTable, resetFlag }) {
         ...previous,
         page: 0,
         rowsPerPage: Number.parseInt(event.target.value, 10),
-        resetFlag,
       }));
     },
-    [resetFlag],
+    [],
   );
 
   return {
@@ -620,11 +632,11 @@ const DataRow = React.memo(function DataRow(props) {
   );
 
   const toggleSubRow = React.useCallback((index) => {
-    setReveal((previous) =>
-      previous.map((value, currentIndex) =>
-        currentIndex === index ? !value : value,
-      ),
-    );
+    setReveal((previous) => {
+      const next = [...previous];
+      next[index] = !next[index];
+      return next;
+    });
   }, []);
 
   return (
@@ -712,9 +724,7 @@ function SearchArea(props) {
   const { current, setFinalVal } = props;
   const searchVal = React.useMemo(
     () =>
-      current ||
-      sessionStorage.getItem(`searchVal:${props.searchName}`) ||
-      "",
+      current ?? sessionStorage.getItem(`searchVal:${props.searchName}`) ?? "",
     [current, props.searchName],
   );
 
@@ -776,7 +786,7 @@ TableTitle.propTypes = {
 TableToolbarContent.propTypes = {
   setLoading: PropTypes.func,
   reloadBtnLoading: PropTypes.bool,
-  searchDets: PropTypes.string,
+  searchTerm: PropTypes.string,
   onSearchChange: PropTypes.func.isRequired,
   name: PropTypes.string,
 };
