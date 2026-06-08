@@ -15,12 +15,16 @@
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
+  "types": "src/index.d.ts",
   "files": [
     "dist",
+    "src/index.d.ts",
+    "LICENSE",
     "README.md"
   ],
   "exports": {
     ".": {
+      "types": "./src/index.d.ts",
       "import": "./dist/index.esm.js",
       "require": "./dist/index.js"
     }
@@ -74,7 +78,6 @@
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "rollup": "^4.60.1",
-    "rollup-plugin-dts": "^6.4.1",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "typescript": "^6.0.2"
   },
