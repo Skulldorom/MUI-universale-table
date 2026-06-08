@@ -2,6 +2,7 @@ import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import { babel } from "@rollup/plugin-babel";
 import peerDepsExternal from "rollup-plugin-peer-deps-external";
+import { dts } from "rollup-plugin-dts";
 import { readFileSync } from "fs";
 
 const packageJson = JSON.parse(readFileSync("./package.json", "utf8"));
@@ -52,5 +53,10 @@ export default [
       "@emotion/styled",
       "prop-types",
     ],
+  },
+  {
+    input: "src/index.d.ts",
+    output: [{ file: "dist/index.d.ts", format: "es" }],
+    plugins: [dts()],
   },
 ];
