@@ -363,6 +363,7 @@ function useEnhancedTableState({ rows, subTable, resetFlag }) {
   }));
 
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPagination((previous) => {
       if (previous.resetFlag === resetFlag) {
         return previous;
