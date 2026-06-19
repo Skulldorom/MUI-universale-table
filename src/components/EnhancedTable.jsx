@@ -38,6 +38,8 @@ function EnhancedTable(props) {
     headers,
   });
 
+  const handleSort = (column, direction) => {};
+
   const emptyRows = Math.max(
     0,
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage),
@@ -112,7 +114,9 @@ function EnhancedTable(props) {
         <Box sx={{ mb: 3 }} />
       ) : (
         <TablePagination
-          rowsPerPageOptions={props.pageSizeOptions || getPageOptions(rows.length)}
+          rowsPerPageOptions={
+            props.pageSizeOptions || getPageOptions(rows.length)
+          }
           component="div"
           count={rows.length}
           rowsPerPage={rowsPerPage}

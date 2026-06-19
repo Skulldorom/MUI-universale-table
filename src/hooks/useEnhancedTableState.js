@@ -1,6 +1,11 @@
 import React from "react";
 
-export default function useEnhancedTableState({ rows, subTable, resetFlag, headers }) {
+export default function useEnhancedTableState({
+  rows,
+  subTable,
+  resetFlag,
+  headers,
+}) {
   const firstSortableId = React.useMemo(() => {
     if (!headers || headers.length === 0) return "";
     return headers[0].id;
@@ -41,26 +46,20 @@ export default function useEnhancedTableState({ rows, subTable, resetFlag, heade
     [order, orderBy],
   );
 
-  const handleChangePage = React.useCallback(
-    (event, newPage) => {
-      setPagination((previous) => ({
-        ...previous,
-        page: newPage,
-      }));
-    },
-    [],
-  );
+  const handleChangePage = React.useCallback((event, newPage) => {
+    setPagination((previous) => ({
+      ...previous,
+      page: newPage,
+    }));
+  }, []);
 
-  const handleChangeRowsPerPage = React.useCallback(
-    (event) => {
-      setPagination((previous) => ({
-        ...previous,
-        page: 0,
-        rowsPerPage: Number.parseInt(event.target.value, 10),
-      }));
-    },
-    [],
-  );
+  const handleChangeRowsPerPage = React.useCallback((event) => {
+    setPagination((previous) => ({
+      ...previous,
+      page: 0,
+      rowsPerPage: Number.parseInt(event.target.value, 10),
+    }));
+  }, []);
 
   return {
     order,

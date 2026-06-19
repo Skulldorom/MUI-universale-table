@@ -49,10 +49,6 @@ export default function UniversalTable({
     [clearSelection, setSearchTerm],
   );
 
-  const handleSort = (column, direction) => {
-    handleSort;
-  };
-
   React.useEffect(() => {
     const cancelID = debounceRef.current;
     return () => clearTimeout(cancelID);
@@ -91,6 +87,7 @@ export default function UniversalTable({
           headers={head}
           rows={rows}
           resetFlag={searchTerm}
+          searchTerm={searchTerm}
           subTable={subTable}
           hideBadge={hideBadge}
           loading={loading}
