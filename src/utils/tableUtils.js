@@ -117,6 +117,9 @@ export function stableSort(array, comparator, headers) {
 
   // Build stable entries — compare pre-computed sort keys so we never
   // mutate the original data or its shallow copies.
+  // Each entry is [originalRow, sortKey, index] so that the comparator
+  // works on numeric-converted date values while the original rows are
+  // returned unchanged (preserving the data seen by header.component).
   const stabilizedThis = array.map((el, index) => {
     const sortKey = { ...el };
     for (const property in sortKey) {
@@ -129,13 +132,13 @@ export function stableSort(array, comparator, headers) {
         }
       }
     }
-    return [sortKey, index];
+    return [el, sortKey, index];
   });
 
   stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
+    const order = comparator(a[1], b[1]);
     if (order !== 0) return order;
-    return a[1] - b[1];
+    return a[2] - b[2];
   });
   return stabilizedThis.map((el) => el[0]);
 }

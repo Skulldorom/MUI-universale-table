@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { UniversalTable } from "mui-universale-table";
+import { UniversalTable } from "mui-universal-table";
 
 // Simple data structure
 const users = [

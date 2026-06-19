@@ -17,7 +17,7 @@ A comprehensive, feature-rich table component built with Material-UI for React a
 ## Installation
 
 ```bash
-npm install mui-universale-table
+npm install mui-universal-table
 ```
 
 ### Peer Dependencies
@@ -32,7 +32,7 @@ npm install react react-dom @mui/material @emotion/react @emotion/styled @mui/ic
 
 ```jsx
 import React from "react";
-import { UniversalTable } from "mui-universale-table";
+import { UniversalTable } from "mui-universal-table";
 
 const headers = [
   { id: "name", label: "Name", searchable: true },
