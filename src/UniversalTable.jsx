@@ -28,7 +28,10 @@ export default function UniversalTable({
   onSelection,
   pageSizeOptions,
   persistSearch,
+  async = false,
 }) {
+  const debounceRef = React.useRef(null);
+
   const head = headers || [];
   const { rows, searchTerm, setSearchTerm } = useSearchableRows(data, head);
   const { selected, clearSelection, handleSelectAllClick, handleClick } =
@@ -45,6 +48,15 @@ export default function UniversalTable({
     },
     [clearSelection, setSearchTerm],
   );
+
+  const handleSort = (column, direction) => {
+    handleSort;
+  };
+
+  React.useEffect(() => {
+    const cancelID = debounceRef.current;
+    return () => clearTimeout(cancelID);
+  }, []);
 
   return (
     <>
