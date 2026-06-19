@@ -319,3 +319,78 @@ test("table element has aria-label matching the name prop", () => {
   const table = document.querySelector("table");
   expect(table).toHaveAttribute("aria-label", "MyTable");
 });
+
+// ---------------------------------------------------------------------------
+// Date formatting
+// ---------------------------------------------------------------------------
+
+import { formatCellValue } from "../src/utils/tableUtils.js";
+
+const dateHeader = { id: "date", label: "Date", date: true };
+const stringHeader = { id: "name", label: "Name" };
+
+test("formatCellValue formats ISO date string", () => {
+  const result = formatCellValue(dateHeader, { date: "2024-01-15T10:30:00Z" });
+  expect(result).toContain("2024");
+  expect(result).toContain("Jan");
+  expect(result).toContain("15");
+  expect(result).toContain(":");
+});
+
+test("formatCellValue formats epoch-millisecond number (regression guard)", () => {
+  // This was the specific regression: Date.parse(1705324800000) returns NaN
+  const epochMs = new Date("2024-01-15T10:30:00Z").getTime();
+  const result = formatCellValue(dateHeader, { date: epochMs });
+  expect(result).toContain("2024");
+  expect(result).toContain("Jan");
+  expect(result).toContain("15");
+  expect(result).toContain(":");
+});
+
+test("formatCellValue returns raw value for invalid date", () => {
+  const result = formatCellValue(dateHeader, { date: "not-a-date-at-all" });
+  expect(result).toBe("not-a-date-at-all");
+});
+
+test("formatCellValue returns raw value for null date", () => {
+  const result = formatCellValue(dateHeader, { date: null });
+  expect(result).toBeNull();
+});
+
+test("formatCellValue returns raw value for undefined date", () => {
+  const result = formatCellValue(dateHeader, { date: undefined });
+  expect(result).toBeUndefined();
+});
+
+test("formatCellValue returns raw value for non-date column", () => {
+  const result = formatCellValue(stringHeader, { name: "John Doe" });
+  expect(result).toBe("John Doe");
+});
+
+test("formatCellValue handles a Date object", () => {
+  const result = formatCellValue(dateHeader, { date: new Date("2024-01-15T10:30:00Z") });
+  expect(result).toContain("2024");
+  expect(result).toContain("Jan");
+  expect(result).toContain("15");
+});
+
+test("renders date column formatted in the table", () => {
+  const dateData = [
+    { id: 1, name: "Event A", timestamp: "2024-01-15T10:30:00Z" },
+    { id: 2, name: "Event B", timestamp: 1705324800000 },
+    { id: 3, name: "Event C", timestamp: "invalid" },
+  ];
+  const dateHeaders = [
+    { id: "name", label: "Name" },
+    { id: "timestamp", label: "Timestamp", date: true },
+  ];
+
+  render(
+    <UniversalTable data={dateData} headers={dateHeaders} name="Dates" loading={false} />,
+  );
+
+  // ISO string → formatted, epoch ms → also formatted (same date, different time)
+  expect(screen.getAllByText(/Jan 15 2024/).length).toBe(2);
+  // "invalid" → shown as-is (fallback)
+  expect(screen.getByText("invalid")).toBeInTheDocument();
+});
