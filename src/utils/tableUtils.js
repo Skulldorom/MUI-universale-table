@@ -82,6 +82,10 @@ export function getComparator(order, orderBy) {
  * Format a cell value for display. Handles dates safely:
  * returns the raw value for non-date headers, and a formatted
  * date string for date headers (guards against invalid dates).
+ *
+ * Uses `new Date(raw)` directly rather than `Date.parse(raw)` to
+ * handle epoch-millisecond numbers, Date objects, and string
+ * formats that Date.parse may reject.
  */
 export function formatCellValue(header, rowValues) {
   const raw = rowValues[header.id];
@@ -89,12 +93,16 @@ export function formatCellValue(header, rowValues) {
     return raw;
   }
 
-  const timestamp = Date.parse(raw);
-  if (Number.isNaN(timestamp)) {
+  // null and undefined produce a valid epoch-0 Date, not Invalid Date
+  if (raw === null || raw === undefined) {
     return raw;
   }
 
-  const d = new Date(timestamp);
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) {
+    return raw;
+  }
+
   return d.toDateString() + " " + d.toLocaleTimeString();
 }
 
@@ -109,7 +117,12 @@ export function stableSort(array, comparator, headers) {
     const sortKey = { ...el };
     for (const property in sortKey) {
       if (dateColumns.has(property)) {
-        sortKey[property] = Number(new Date(sortKey[property]));
+        const parsed = Number(new Date(sortKey[property]));
+        // Preserve the original value for invalid dates so formatCellValue
+        // can display the fallback instead of passing NaN to React children.
+        if (!Number.isNaN(parsed)) {
+          sortKey[property] = parsed;
+        }
       }
     }
     return [sortKey, index];
