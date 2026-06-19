@@ -35,7 +35,6 @@ function EnhancedTable(props) {
     rows,
     subTable,
     resetFlag: props.resetFlag,
-    headers,
   });
 
   const emptyRows = Math.max(

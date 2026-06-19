@@ -46,17 +46,17 @@ test("renders table title", () => {
   expect(screen.getByText("Test Users")).toBeInTheDocument();
 });
 
-test("renders data rows on first page (default 5 per page, desc sort)", () => {
+test("renders data rows on first page (default 5 per page, no sort)", () => {
   render(
     <UniversalTable data={data} headers={headers} name="Users" loading={false} />,
   );
 
-  // Default sort is "desc" on first column (name). Descending order of names:
-  // John, Jane, Diana, Charlie, Bob — Alice is row 6 (page 2)
+  // No default sort — rows appear in insertion order.
+  // First 5: John, Jane, Bob, Alice, Charlie. Diana is row 6 (page 2).
   expect(screen.getByText("John Doe")).toBeInTheDocument();
   expect(screen.getByText("Jane Smith")).toBeInTheDocument();
   expect(screen.getByText("Bob Brown")).toBeInTheDocument();
-  // Alice is on page 2 (row 6 of 6, 5 per page)
+  // Diana is on page 2 (row 6 of 6, 5 per page)
 });
 
 test("renders column headers", () => {
@@ -181,7 +181,7 @@ test("clicking a column header toggles sort direction", async () => {
   );
 
   const nameHeader = screen.getByText("Name");
-  // Name column already sorted desc by default — clicking toggles to asc
+  // No default sort — clicking the Name column sets it to asc
   await user.click(nameHeader);
   // Just verify no crash — the click should work
 });
