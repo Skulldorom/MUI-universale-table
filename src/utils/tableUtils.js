@@ -103,7 +103,11 @@ export function formatCellValue(header, rowValues) {
     return raw;
   }
 
-  return d.toDateString() + " " + d.toLocaleTimeString();
+  return d.toDateString() + " " + d.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
 }
 
 export function stableSort(array, comparator, headers) {
