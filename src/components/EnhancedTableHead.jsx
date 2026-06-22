@@ -21,10 +21,6 @@ function EnhancedTableHead(props) {
     onSelectAllClick,
   } = props;
 
-  const createSortHandler = (property) => (event) => {
-    onRequestSort(event, property);
-  };
-
   return (
     <TableHead>
       <TableRow>
@@ -48,7 +44,7 @@ function EnhancedTableHead(props) {
             <TableSortLabel
               active={orderBy === headCell.id}
               direction={orderBy === headCell.id ? order : "asc"}
-              onClick={createSortHandler(headCell.id)}
+              onClick={() => onRequestSort(headCell.id, headCell.sortable)}
               disable={headCell.subRow}
             >
               {headCell.label}

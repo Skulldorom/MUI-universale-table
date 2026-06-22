@@ -1,8 +1,16 @@
 import React from "react";
 
-export default function useEnhancedTableState({ rows, subTable, resetFlag }) {
-  const [order, setOrder] = React.useState("asc");
-  const [orderBy, setOrderBy] = React.useState("");
+export default function useEnhancedTableState({
+  rows,
+  subTable,
+  resetFlag,
+  apiCall,
+  searchTerm,
+  setOrder,
+  setOrderBy,
+  order,
+  orderBy,
+}) {
   const [pagination, setPagination] = React.useState(() => ({
     page: 0,
     rowsPerPage: subTable ? rows.length : 5,
@@ -28,12 +36,12 @@ export default function useEnhancedTableState({ rows, subTable, resetFlag }) {
   const rowsPerPage = subTable ? rows.length : pagination.rowsPerPage;
 
   const handleRequestSort = React.useCallback(
-    (event, property) => {
+    (property) => {
       const isAsc = orderBy === property && order === "asc";
       setOrder(isAsc ? "desc" : "asc");
       setOrderBy(property);
     },
-    [order, orderBy],
+    [order, orderBy, setOrder, setOrderBy],
   );
 
   const handleChangePage = React.useCallback((event, newPage) => {
@@ -51,13 +59,24 @@ export default function useEnhancedTableState({ rows, subTable, resetFlag }) {
     }));
   }, []);
 
+  const handleSort = (column, api) => {
+    if (api) {
+      const direction = orderBy === "asc" ? "desc" : "asc";
+      apiCall(searchTerm, column, direction);
+      setOrder(direction);
+      setOrderBy(column);
+      return;
+    }
+    handleRequestSort(column);
+  };
+
   return {
     order,
     orderBy,
     page,
     rowsPerPage,
-    handleRequestSort,
     handleChangePage,
     handleChangeRowsPerPage,
+    handleSort,
   };
 }

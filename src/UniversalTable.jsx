@@ -33,7 +33,13 @@ export default function UniversalTable({
   const debounceRef = React.useRef(null);
 
   const head = headers || [];
-  const { rows, searchTerm, setSearchTerm } = useSearchableRows(data, head);
+  const { rows, searchTerm, setSearchTerm } = useSearchableRows(
+    data,
+    head,
+    async,
+  );
+  const [order, setOrder] = React.useState("asc");
+  const [orderBy, setOrderBy] = React.useState("");
   const { selected, clearSelection, handleSelectAllClick, handleClick } =
     useSelectableRows({
       rows,
@@ -48,6 +54,18 @@ export default function UniversalTable({
     },
     [clearSelection, setSearchTerm],
   );
+  const handleSearch = (searchValue) => {
+    if (async) {
+      setSearchTerm(searchValue);
+      clearTimeout(debounceRef.current);
+
+      debounceRef.current = setTimeout(() => {
+        setLoading({ searchValue, order, orderBy });
+      }, 500);
+    } else {
+      handleSearchChange(searchValue);
+    }
+  };
 
   React.useEffect(() => {
     const cancelID = debounceRef.current;
@@ -78,7 +96,7 @@ export default function UniversalTable({
             onReload={onReload}
             reloadBtnLoading={reloadBtnLoading}
             searchTerm={searchTerm}
-            onSearchChange={handleSearchChange}
+            onSearchChange={handleSearch}
             name={name}
             persistSearch={persistSearch}
           />
@@ -98,6 +116,11 @@ export default function UniversalTable({
           selectID={selectID}
           pageSizeOptions={pageSizeOptions}
           name={name}
+          setLoading={setLoading}
+          order={order}
+          orderBy={orderBy}
+          setOrder={setOrder}
+          setOrderBy={setOrderBy}
         />
       </Paper>
     </>
@@ -126,4 +149,5 @@ UniversalTable.propTypes = {
   pageSizeOptions: PropTypes.arrayOf(PropTypes.number),
   /** Persist search term to sessionStorage (requires name prop). Default: false */
   persistSearch: PropTypes.bool,
+  async: PropTypes.bool,
 };

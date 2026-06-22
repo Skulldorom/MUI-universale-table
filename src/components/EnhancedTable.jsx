@@ -21,23 +21,37 @@ import DataRow from "./DataRow";
 import TableLoader from "./TableLoader";
 
 function EnhancedTable(props) {
-  const { headers, rows, subTable, selected, selectID } = props;
-  const dense = true;
   const {
+    headers,
+    rows,
+    subTable,
+    selected,
+    selectID,
+    setLoading,
+    searchTerm,
+    setOrder,
+    setOrderBy,
     order,
     orderBy,
+  } = props;
+  const dense = true;
+  const {
     page,
     rowsPerPage,
-    handleRequestSort,
+    handleSort,
     handleChangePage,
     handleChangeRowsPerPage,
   } = useEnhancedTableState({
     rows,
     subTable,
     resetFlag: props.resetFlag,
+    apiCall: setLoading,
+    searchTerm,
+    setOrder,
+    setOrderBy,
+    order,
+    orderBy,
   });
-
-  const handleSort = (column, direction) => {};
 
   const emptyRows = Math.max(
     0,
@@ -72,7 +86,7 @@ function EnhancedTable(props) {
             <EnhancedTableHead
               order={order}
               orderBy={orderBy}
-              onRequestSort={handleRequestSort}
+              onRequestSort={handleSort}
               headings={headers}
               selectRows={props.selectRows}
               numSelected={selected.length}
@@ -145,6 +159,8 @@ EnhancedTable.propTypes = {
   resetFlag: PropTypes.string,
   pageSizeOptions: PropTypes.arrayOf(PropTypes.number),
   name: PropTypes.string,
+  setLoading: PropTypes.func,
+  searchTerm: PropTypes.string,
 };
 
 export default EnhancedTable;
