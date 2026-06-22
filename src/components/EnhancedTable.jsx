@@ -33,6 +33,8 @@ function EnhancedTable(props) {
     setOrderBy,
     order,
     orderBy,
+    async,
+    asyncPages,
   } = props;
   const dense = true;
   const {
@@ -51,6 +53,7 @@ function EnhancedTable(props) {
     setOrderBy,
     order,
     orderBy,
+    asyncPages,
   });
 
   const emptyRows = Math.max(
@@ -92,6 +95,7 @@ function EnhancedTable(props) {
               numSelected={selected.length}
               rowCount={rows.length}
               onSelectAllClick={props.handleSelectAllClick}
+              async={async}
             />
 
             <TableBody>
@@ -156,6 +160,7 @@ EnhancedTable.propTypes = {
   handleClick: PropTypes.func,
   selected: PropTypes.array,
   selectID: PropTypes.string,
+  async: PropTypes.bool,
   resetFlag: PropTypes.string,
   pageSizeOptions: PropTypes.arrayOf(PropTypes.number),
   name: PropTypes.string,
@@ -165,6 +170,7 @@ EnhancedTable.propTypes = {
   setOrderBy: PropTypes.func,
   order: PropTypes.string,
   orderBy: PropTypes.string,
+  asyncPages: PropTypes.number,
 };
 
 export default EnhancedTable;

@@ -59,10 +59,10 @@ export default function useEnhancedTableState({
     }));
   }, []);
 
-  const handleSort = (column, api) => {
-    if (api) {
+  const handleSort = (column, apiSortable) => {
+    if (apiSortable) {
       const direction = order === "asc" ? "desc" : "asc";
-      apiCall({ searchTerm, column, direction });
+      apiCall({ searchTerm, column, direction, pages: 1 });
       setOrder(direction);
       setOrderBy(column);
       return;

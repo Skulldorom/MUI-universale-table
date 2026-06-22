@@ -19,6 +19,7 @@ function EnhancedTableHead(props) {
     numSelected,
     rowCount,
     onSelectAllClick,
+    async,
   } = props;
 
   return (
@@ -44,7 +45,9 @@ function EnhancedTableHead(props) {
             <TableSortLabel
               active={orderBy === headCell.id}
               direction={orderBy === headCell.id ? order : "asc"}
-              onClick={() => onRequestSort(headCell.id, headCell.sortable)}
+              onClick={() =>
+                onRequestSort(headCell.id, headCell.sortable && async)
+              }
               disabled={headCell.subRow}
             >
               {headCell.label}
@@ -70,6 +73,7 @@ EnhancedTableHead.propTypes = {
   numSelected: PropTypes.number,
   rowCount: PropTypes.number,
   onSelectAllClick: PropTypes.func,
+  async: PropTypes.bool,
 };
 
 export default EnhancedTableHead;
