@@ -161,6 +161,10 @@ EnhancedTable.propTypes = {
   name: PropTypes.string,
   setLoading: PropTypes.func,
   searchTerm: PropTypes.string,
+  setOrder: PropTypes.func,
+  setOrderBy: PropTypes.func,
+  order: PropTypes.string,
+  orderBy: PropTypes.string,
 };
 
 export default EnhancedTable;
