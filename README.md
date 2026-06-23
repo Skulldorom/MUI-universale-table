@@ -11,6 +11,7 @@ A comprehensive, feature-rich table component built with Material-UI for React a
 - 📊 **Sub-tables** - Expandable nested tables for hierarchical data
 - 🎨 **Customizable** - Extensive styling and behavior customization
 - ⚡ **Performance** - Optimized for large datasets with lazy loading support
+- ☁️ **Server-Side Mode** - Externally-controlled pagination, sort, and search for massive datasets
 - 🔄 **Refresh** - Built-in reload functionality
 - 📱 **Responsive** - Mobile-friendly design
 
@@ -69,6 +70,7 @@ function MyTable() {
 | `name`             | `string`  | -            | Table title                                        |
 | `loading`          | `bool`    | `false`      | Shows loading state                                |
 | `setLoading`       | `func`    | -            | Function to control loading state                  |
+| `onReload`         | `func`    | -            | Preferred — fires when the user clicks reload      |
 | `selectRows`       | `bool`    | `false`      | Enable row selection                               |
 | `selectID`         | `string`  | -            | Property to use as unique identifier for selection |
 | `onSelection`      | `func`    | -            | Callback when rows are selected                    |
@@ -79,6 +81,21 @@ function MyTable() {
 | `currentPage`      | `number`  | -            | Current page for lazy loading                      |
 | `totalPages`       | `number`  | -            | Total pages for lazy loading                       |
 | `selectIcon`       | `element` | -            | Custom icon for selection action                   |
+| `pageSizeOptions`  | `array`   | -            | Override default page size options (e.g. `[10, 25, 50]`) |
+| `persistSearch`    | `bool`    | `false`      | Persist search term to sessionStorage              |
+
+### Server-Side Mode Props
+
+| Prop                   | Type     | Default | Description                                              |
+| ---------------------- | -------- | ------- | -------------------------------------------------------- |
+| `serverSide`           | `bool`   | `false` | Enable server-side data flow                             |
+| `totalCount`           | `number` | -       | Total row count for pagination math                      |
+| `page`                 | `number` | -       | Controlled current page                                  |
+| `onPageChange`         | `func`   | -       | Callback `(page: number) => void`                        |
+| `rowsPerPage`          | `number` | -       | Controlled rows per page                                 |
+| `onRowsPerPageChange`  | `func`   | -       | Callback `(rowsPerPage: number) => void`                 |
+| `onSortChange`         | `func`   | -       | Callback `({ order, orderBy }) => void`                  |
+| `onSearchChange`       | `func`   | -       | Callback `(term: string) => void`                        |
 
 ## Header Configuration
 
@@ -97,6 +114,65 @@ Each header object can have the following properties:
 | `iconColor`  | `string`  | Color for expand/collapse icons                          |
 | `openIcon`   | `element` | Custom icon for expanding                                |
 | `closeIcon`  | `element` | Custom icon for collapsing                               |
+
+## Server-Side Mode
+
+When `serverSide={true}`, the component switches from internal client-side state to externally-controlled props. This lets you paginate, sort, and search against a backend API — ideal for datasets with thousands of rows.
+
+- `data` should contain **only the current page rows**, not the entire dataset
+- Pagination is controlled via `page`, `onPageChange`, `rowsPerPage`, `onRowsPerPageChange`, and `totalCount`
+- Sorting fires `onSortChange({ order, orderBy })` on column header click
+- Search fires `onSearchChange(term)` on input change
+
+```jsx
+function MyPage() {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
+  const [totalCount, setTotalCount] = useState(0);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState({ order: "asc", orderBy: "" });
+
+  // Debounced fetch — only 1 page at a time
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(true);
+      fetch(
+        `/api/data?page=${page}&size=${rowsPerPage}` +
+        `&search=${search}&sort=${sort.orderBy}&dir=${sort.order}`
+      )
+        .then((r) => r.json())
+        .then(({ data, total }) => {
+          setRows(data);
+          setTotalCount(total);
+        })
+        .finally(() => setLoading(false));
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [page, rowsPerPage, search, sort]);
+
+  return (
+    <UniversalTable
+      serverSide
+      data={rows}
+      totalCount={totalCount}
+      page={page}
+      onPageChange={setPage}
+      rowsPerPage={rowsPerPage}
+      onRowsPerPageChange={setRowsPerPage}
+      onSortChange={setSort}
+      onSearchChange={(term) => {
+        setPage(0);
+        setSearch(term);
+      }}
+      headers={headers}
+      loading={loading}
+      setLoading={setLoading}
+    />
+  );
+}
+```
 
 ## Advanced Examples
 

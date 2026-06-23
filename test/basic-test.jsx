@@ -404,3 +404,236 @@ test("renders date column formatted in the table", () => {
   // "invalid" → shown as-is (fallback)
   expect(screen.getByText("invalid")).toBeInTheDocument();
 });
+
+// ---------------------------------------------------------------------------
+// Server-Side Mode
+// ---------------------------------------------------------------------------
+
+const serverHeaders = [
+  { id: "name", label: "Name", searchable: true },
+  { id: "email", label: "Email" },
+];
+
+const serverData = [
+  { name: "PageRow1", email: "r1@test.com" },
+  { name: "PageRow2", email: "r2@test.com" },
+  { name: "PageRow3", email: "r3@test.com" },
+];
+
+test("serverSide renders controlled data as-is (no sort, no slice)", () => {
+  render(
+    <UniversalTable
+      serverSide
+      data={serverData}
+      headers={serverHeaders}
+      name="Server"
+      loading={false}
+      totalCount={100}
+      page={0}
+      rowsPerPage={3}
+    />,
+  );
+
+  // All 3 rows should be visible — no slicing applied
+  expect(screen.getByText("PageRow1")).toBeInTheDocument();
+  expect(screen.getByText("PageRow2")).toBeInTheDocument();
+  expect(screen.getByText("PageRow3")).toBeInTheDocument();
+  // Pagination shows totalCount
+  expect(screen.getByText("1–3 of 100")).toBeInTheDocument();
+});
+
+test("serverSide fires onSortChange on header click (asc)", async () => {
+  const user = userEvent.setup();
+  const onSortChange = jest.fn();
+
+  render(
+    <UniversalTable
+      serverSide
+      data={serverData}
+      headers={serverHeaders}
+      name="ServerSort"
+      loading={false}
+      totalCount={100}
+      page={0}
+      rowsPerPage={3}
+      order="asc"
+      orderBy=""
+      onSortChange={onSortChange}
+    />,
+  );
+
+  const nameHeader = screen.getByText("Name");
+  await user.click(nameHeader);
+
+  expect(onSortChange).toHaveBeenCalledWith({
+    order: "asc",
+    orderBy: "name",
+  });
+});
+
+test("serverSide fires onSortChange on header click (desc toggle)", async () => {
+  const user = userEvent.setup();
+  const onSortChange = jest.fn();
+
+  render(
+    <UniversalTable
+      serverSide
+      data={serverData}
+      headers={serverHeaders}
+      name="ServerSortDesc"
+      loading={false}
+      totalCount={100}
+      page={0}
+      rowsPerPage={3}
+      order="asc"
+      orderBy="name"
+      onSortChange={onSortChange}
+    />,
+  );
+
+  const nameHeader = screen.getByText("Name");
+  await user.click(nameHeader);
+
+  expect(onSortChange).toHaveBeenCalledWith({
+    order: "desc",
+    orderBy: "name",
+  });
+});
+
+test("serverSide fires onPageChange on next page", async () => {
+  const user = userEvent.setup();
+  const onPageChange = jest.fn();
+
+  render(
+    <UniversalTable
+      serverSide
+      data={serverData}
+      headers={serverHeaders}
+      name="ServerPage"
+      loading={false}
+      totalCount={100}
+      page={0}
+      rowsPerPage={3}
+      onPageChange={onPageChange}
+    />,
+  );
+
+  const nextBtn = screen.getByRole("button", { name: /next page/i });
+  await user.click(nextBtn);
+
+  expect(onPageChange).toHaveBeenCalledWith(1);
+});
+
+test("serverSide fires onRowsPerPageChange", async () => {
+  const user = userEvent.setup();
+  const onRowsPerPageChange = jest.fn();
+
+  render(
+    <UniversalTable
+      serverSide
+      data={serverData}
+      headers={serverHeaders}
+      name="ServerRPP"
+      loading={false}
+      totalCount={100}
+      page={0}
+      rowsPerPage={3}
+      pageSizeOptions={[3, 5, 10]}
+      onRowsPerPageChange={onRowsPerPageChange}
+    />,
+  );
+
+  const comboBox = screen.getByRole("combobox");
+  await user.click(comboBox);
+
+  const option5 = screen.getByRole("option", { name: "5" });
+  await user.click(option5);
+
+  expect(onRowsPerPageChange).toHaveBeenCalledWith(5);
+});
+
+test("serverSide fires onSearchChange on search input", async () => {
+  const user = userEvent.setup();
+  const onSearchChange = jest.fn();
+
+  render(
+    <UniversalTable
+      serverSide
+      data={serverData}
+      headers={serverHeaders}
+      name="ServerSearch"
+      loading={false}
+      totalCount={100}
+      page={0}
+      rowsPerPage={3}
+      onSearchChange={onSearchChange}
+    />,
+  );
+
+  const searchInput = screen.getByPlaceholderText("Search");
+  await user.type(searchInput, "test");
+
+  // FancySearch has a 700ms debounce
+  await new Promise((r) => setTimeout(r, 800));
+
+  // onSearchChange should have been called at least once
+  expect(onSearchChange).toHaveBeenCalled();
+  const lastCall = onSearchChange.mock.calls[onSearchChange.mock.calls.length - 1][0];
+  expect(lastCall).toContain("test");
+});
+
+test("serverSide with selectRows works", async () => {
+  const user = userEvent.setup();
+  const selectHeaders = [
+    { id: "id", label: "ID", numeric: true },
+    { id: "name", label: "Name", searchable: true },
+  ];
+  const selectData = [
+    { id: 1, name: "Alpha" },
+    { id: 2, name: "Beta" },
+  ];
+
+  render(
+    <UniversalTable
+      serverSide
+      data={selectData}
+      headers={selectHeaders}
+      name="ServerSelect"
+      loading={false}
+      totalCount={50}
+      page={0}
+      rowsPerPage={2}
+      selectRows={true}
+      selectID="id"
+    />,
+  );
+
+  const checkboxes = screen.getAllByRole("checkbox");
+  await user.click(checkboxes[0]);
+
+  expect(screen.getByText("2 selected")).toBeInTheDocument();
+});
+
+test("serverSide=false still works (explicit client mode)", () => {
+  // 6 items, default 5 per page — only first 5 visible
+  const data = [
+    { name: "A" }, { name: "B" }, { name: "C" },
+    { name: "D" }, { name: "E" }, { name: "F" },
+  ];
+  const headers = [{ id: "name", label: "Name", searchable: true }];
+
+  render(
+    <UniversalTable
+      serverSide={false}
+      data={data}
+      headers={headers}
+      name="ExplicitClient"
+      loading={false}
+    />,
+  );
+
+  expect(screen.getByText("A")).toBeInTheDocument();
+  expect(screen.getByText("E")).toBeInTheDocument();
+  expect(screen.queryByText("F")).not.toBeInTheDocument();
+  expect(screen.getByText("1–5 of 6")).toBeInTheDocument();
+});
