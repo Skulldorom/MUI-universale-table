@@ -28,9 +28,25 @@ export default function UniversalTable({
   onSelection,
   pageSizeOptions,
   persistSearch,
+  // --- Server-side mode props ---
+  serverSide = false,
+  totalCount,
+  page,
+  onPageChange,
+  rowsPerPage,
+  onRowsPerPageChange,
+  order,
+  orderBy,
+  onSortChange,
+  onSearchChange,
 }) {
   const head = headers || [];
-  const { rows, searchTerm, setSearchTerm } = useSearchableRows(data, head);
+
+  // Client-side search only applies when NOT in server-side mode
+  const clientSearch = useSearchableRows(data, head);
+  const rows = serverSide ? data : clientSearch.rows;
+  const searchTerm = serverSide ? "" : clientSearch.searchTerm;
+
   const { selected, clearSelection, handleSelectAllClick, handleClick } =
     useSelectableRows({
       rows,
@@ -41,9 +57,17 @@ export default function UniversalTable({
   const handleSearchChange = React.useCallback(
     (value) => {
       clearSelection();
-      setSearchTerm(value);
+      if (serverSide) {
+        // Server-side: delegate search to the parent
+        if (onSearchChange) {
+          onSearchChange(value);
+        }
+      } else {
+        // Client-side: filter in memory
+        clientSearch.setSearchTerm(value);
+      }
     },
-    [clearSelection, setSearchTerm],
+    [clearSelection, serverSide, onSearchChange, clientSearch],
   );
 
   return (
@@ -78,7 +102,7 @@ export default function UniversalTable({
         <EnhancedTable
           headers={head}
           rows={rows}
-          resetFlag={searchTerm}
+          resetFlag={serverSide ? undefined : searchTerm}
           subTable={subTable}
           hideBadge={hideBadge}
           loading={loading}
@@ -89,6 +113,16 @@ export default function UniversalTable({
           selectID={selectID}
           pageSizeOptions={pageSizeOptions}
           name={name}
+          // --- Server-side props ---
+          serverSide={serverSide}
+          totalCount={totalCount}
+          page={page}
+          onPageChange={onPageChange}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={onRowsPerPageChange}
+          order={order}
+          orderBy={orderBy}
+          onSortChange={onSortChange}
         />
       </Paper>
     </>
@@ -117,4 +151,26 @@ UniversalTable.propTypes = {
   pageSizeOptions: PropTypes.arrayOf(PropTypes.number),
   /** Persist search term to sessionStorage (requires name prop). Default: false */
   persistSearch: PropTypes.bool,
+
+  // --- Server-side mode ---
+  /** Enable server-side data flow. When true, pagination, sort, and search are externally controlled. */
+  serverSide: PropTypes.bool,
+  /** Total row count for pagination math (required when serverSide). */
+  totalCount: PropTypes.number,
+  /** Controlled current page (required when serverSide). */
+  page: PropTypes.number,
+  /** Callback (page: number) => void (required when serverSide). */
+  onPageChange: PropTypes.func,
+  /** Controlled rows per page (required when serverSide). */
+  rowsPerPage: PropTypes.number,
+  /** Callback (rowsPerPage: number) => void (required when serverSide). */
+  onRowsPerPageChange: PropTypes.func,
+  /** Callback ({ order, orderBy }) => void. */
+  onSortChange: PropTypes.func,
+  /** Controlled sort order. */
+  order: PropTypes.oneOf(["asc", "desc"]),
+  /** Controlled sort column. */
+  orderBy: PropTypes.string,
+  /** Callback (term: string) => void. */
+  onSearchChange: PropTypes.func,
 };

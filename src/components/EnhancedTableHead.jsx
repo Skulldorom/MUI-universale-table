@@ -15,14 +15,24 @@ function EnhancedTableHead(props) {
     order,
     orderBy,
     onRequestSort,
+    onSortChange,
     selectRows,
     numSelected,
     rowCount,
     onSelectAllClick,
   } = props;
 
+  /**
+   * Server-side mode: fire onSortChange({ order, orderBy }).
+   * Client-side mode: fire onRequestSort(event, property).
+   */
   const createSortHandler = (property) => (event) => {
-    onRequestSort(event, property);
+    if (onSortChange) {
+      const isAsc = orderBy === property && order === "asc";
+      onSortChange({ order: isAsc ? "desc" : "asc", orderBy: property });
+    } else {
+      onRequestSort(event, property);
+    }
   };
 
   return (
@@ -66,7 +76,8 @@ function EnhancedTableHead(props) {
 }
 
 EnhancedTableHead.propTypes = {
-  onRequestSort: PropTypes.func.isRequired,
+  onRequestSort: PropTypes.func,
+  onSortChange: PropTypes.func,
   order: PropTypes.oneOf(["asc", "desc"]).isRequired,
   orderBy: PropTypes.string.isRequired,
   headings: PropTypes.array.isRequired,

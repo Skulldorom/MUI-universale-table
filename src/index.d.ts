@@ -27,6 +27,11 @@ export interface TableHeader {
   subTitle?: string;
 }
 
+export interface SortChangeEvent {
+  order: "asc" | "desc";
+  orderBy: string;
+}
+
 export interface UniversalTableProps {
   /** Array of data objects to display */
   data: TableRowData[];
@@ -67,6 +72,32 @@ export interface UniversalTableProps {
   pageSizeOptions?: number[];
   /** Persist search term to sessionStorage (requires name prop) */
   persistSearch?: boolean;
+
+  // --- Server-side mode ---
+  /**
+   * Enable server-side data flow.
+   * When true, pagination, sort, and search are externally controlled
+   * via the props below. `data` should contain only the current page rows.
+   */
+  serverSide?: boolean;
+  /** Total row count for pagination math (required when serverSide). */
+  totalCount?: number;
+  /** Controlled current page (required when serverSide). */
+  page?: number;
+  /** Callback (page: number) => void (required when serverSide). */
+  // eslint-disable-next-line no-unused-vars
+  onPageChange?: (page: number) => void;
+  /** Controlled rows per page (required when serverSide). */
+  rowsPerPage?: number;
+  /** Callback (rowsPerPage: number) => void (required when serverSide). */
+  // eslint-disable-next-line no-unused-vars
+  onRowsPerPageChange?: (rowsPerPage: number) => void;
+  /** Callback ({ order, orderBy }) => void — fires on column header click. */
+  // eslint-disable-next-line no-unused-vars
+  onSortChange?: (event: SortChangeEvent) => void;
+  /** Callback (term: string) => void — fires on search input change. */
+  // eslint-disable-next-line no-unused-vars
+  onSearchChange?: (term: string) => void;
 }
 
 declare const UniversalTable: React.FC<UniversalTableProps>;

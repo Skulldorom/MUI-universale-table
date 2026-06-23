@@ -21,7 +21,16 @@ import DataRow from "./DataRow";
 import TableLoader from "./TableLoader";
 
 function EnhancedTable(props) {
-  const { headers, rows, subTable, selected, selectID } = props;
+  const {
+    headers,
+    rows,
+    subTable,
+    selected,
+    selectID,
+    serverSide,
+    totalCount,
+    onSortChange,
+  } = props;
   const dense = true;
   const {
     order,
@@ -35,26 +44,53 @@ function EnhancedTable(props) {
     rows,
     subTable,
     resetFlag: props.resetFlag,
+    serverSide,
+    order: props.order,
+    orderBy: props.orderBy,
+    page: props.page,
+    rowsPerPage: props.rowsPerPage,
+    onSortChange,
+    onPageChange: props.onPageChange,
+    onRowsPerPageChange: props.onRowsPerPageChange,
   });
-
-  const emptyRows = Math.max(
-    0,
-    rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage),
-  );
 
   const isSelected = React.useCallback(
     (id) => selected.includes(id),
     [selected],
   );
 
+  /**
+   * Server-side: rows are already the current page — no sort, no slice.
+   * Client-side: sort the full dataset, then slice to the current page.
+   */
   const visibleRows = React.useMemo(
     () =>
-      stableSort(rows, getComparator(order, orderBy), headers).slice(
-        page * rowsPerPage,
-        page * rowsPerPage + rowsPerPage,
-      ),
-    [headers, order, orderBy, page, rows, rowsPerPage],
+      serverSide
+        ? rows
+        : stableSort(rows, getComparator(order, orderBy), headers).slice(
+            page * rowsPerPage,
+            page * rowsPerPage + rowsPerPage,
+          ),
+    // serverSide only depends on rows; client-side depends on sort/pagination too
+    serverSide
+      ? [rows]
+      : [headers, order, orderBy, page, rows, rowsPerPage],
   );
+
+  /** Placeholder rows to keep the table body height stable on the last page. */
+  const emptyRows = serverSide
+    ? Math.max(
+        0,
+        (rowsPerPage ?? (subTable ? rows.length : 5)) - visibleRows.length,
+      )
+    : Math.max(
+        0,
+        rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage),
+      );
+
+  /** Total row count for pagination display. */
+  const displayCount =
+    serverSide && totalCount != null ? totalCount : rows.length;
 
   return (
     <TableContainer>
@@ -71,6 +107,7 @@ function EnhancedTable(props) {
               order={order}
               orderBy={orderBy}
               onRequestSort={handleRequestSort}
+              onSortChange={serverSide ? onSortChange : undefined}
               headings={headers}
               selectRows={props.selectRows}
               numSelected={selected.length}
@@ -111,9 +148,11 @@ function EnhancedTable(props) {
         <Box sx={{ mb: 3 }} />
       ) : (
         <TablePagination
-          rowsPerPageOptions={props.pageSizeOptions || getPageOptions(rows.length)}
+          rowsPerPageOptions={
+            props.pageSizeOptions || getPageOptions(displayCount)
+          }
           component="div"
-          count={rows.length}
+          count={displayCount}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
@@ -141,6 +180,26 @@ EnhancedTable.propTypes = {
   resetFlag: PropTypes.string,
   pageSizeOptions: PropTypes.arrayOf(PropTypes.number),
   name: PropTypes.string,
+
+  // --- Server-side mode props ---
+  /** Enable server-side data flow (externally-controlled pagination, sort, search). */
+  serverSide: PropTypes.bool,
+  /** Total row count for pagination (required when serverSide). */
+  totalCount: PropTypes.number,
+  /** Controlled current page (required when serverSide). */
+  page: PropTypes.number,
+  /** Callback (page: number) => void (required when serverSide). */
+  onPageChange: PropTypes.func,
+  /** Controlled rows per page (required when serverSide). */
+  rowsPerPage: PropTypes.number,
+  /** Callback (rowsPerPage: number) => void (required when serverSide). */
+  onRowsPerPageChange: PropTypes.func,
+  /** Controlled sort order. */
+  order: PropTypes.oneOf(["asc", "desc"]),
+  /** Controlled sort column. */
+  orderBy: PropTypes.string,
+  /** Callback ({ order, orderBy }) => void. */
+  onSortChange: PropTypes.func,
 };
 
 export default EnhancedTable;
