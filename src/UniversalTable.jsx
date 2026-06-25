@@ -31,6 +31,7 @@ export default function UniversalTable({
   asyncPages,
 }) {
   const debounceRef = React.useRef(null);
+
   const async = typeof asyncPages === "number" && asyncPages > 0;
 
   const head = headers || [];

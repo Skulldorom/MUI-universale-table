@@ -8,14 +8,7 @@ import {
   TableRow,
   TableSortLabel,
 } from "@mui/material";
-import {
-  Box,
-  Checkbox,
-  TableCell,
-  TableHead,
-  TableRow,
-  TableSortLabel,
-} from "@mui/material";
+
 import { visuallyHidden } from "../utils/tableUtils";
 
 function EnhancedTableHead(props) {
