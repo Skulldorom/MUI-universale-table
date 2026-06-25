@@ -62,7 +62,7 @@ export default function UniversalTable({
 
       debounceRef.current = setTimeout(() => {
         setLoading({
-          searchValue,
+          searchTerm: searchValue,
           direction: order,
           column: orderBy,
           pages: asyncPages,
@@ -74,9 +74,22 @@ export default function UniversalTable({
   };
 
   React.useEffect(() => {
-    const cancelID = debounceRef.current;
-    return () => clearTimeout(cancelID);
+    return () => clearTimeout(debounceRef.current);
   }, []);
+
+  const handleReload = React.useCallback(() => {
+    if (typeof onReload === "function") {
+      onReload();
+      return;
+    }
+    if (typeof setLoading === "function") {
+      setLoading(
+        async
+          ? { searchTerm, direction: order, column: orderBy, pages: asyncPages }
+          : true,
+      );
+    }
+  }, [async, onReload, setLoading, searchTerm, order, orderBy, asyncPages]);
 
   return (
     <>
@@ -99,7 +112,7 @@ export default function UniversalTable({
         {!subTable && (
           <TableToolbarContent
             setLoading={setLoading}
-            onReload={onReload}
+            onReload={handleReload}
             reloadBtnLoading={reloadBtnLoading}
             searchTerm={searchTerm}
             onSearchChange={handleSearch}
