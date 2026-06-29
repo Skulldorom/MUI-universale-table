@@ -1,6 +1,6 @@
 import React from "react";
 import { jest } from "@jest/globals";
-import { render, screen, fireEvent, within } from "@testing-library/react";
+import { render, screen, fireEvent, within, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { UniversalTable } from "../src/index.js";
 
@@ -305,7 +305,9 @@ test("async mode search triggers setLoading with payload after debounce", () => 
     // Async mode keeps current rows until new data is fetched.
     expect(screen.getByText("John Doe")).toBeInTheDocument();
 
-    jest.advanceTimersByTime(500);
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
 
     expect(setLoading).toHaveBeenCalledWith({
       searchTerm: "Jane",
